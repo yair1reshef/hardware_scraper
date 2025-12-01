@@ -182,6 +182,7 @@ class GoogleSheetsManager:
             
             total_scraped = 0
             company_counts = {}  # Track jobs per company for logging
+            new_rows = []  # Initialize list for new rows
             
             for company, jobs in jobs_dict.items():
                 count = len(jobs)
