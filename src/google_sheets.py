@@ -5,7 +5,7 @@ Handles reading/writing job data to Google Sheets
 
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 import json
 import tempfile
@@ -175,12 +175,19 @@ class GoogleSheetsManager:
             print(f"Found {len(existing_links)} existing jobs in sheet")
             
             # Prepare new rows
-            new_rows = []
-            current_date = datetime.now().strftime('%Y-%m-%d %H:%M')
+            # Use Israel time (UTC+2) for consistency across environments
+            utc_now = datetime.utcnow()
+            israel_time = utc_now + timedelta(hours=2)
+            current_date = israel_time.strftime('%Y-%m-%d %H:%M')
             
             total_scraped = 0
+            company_counts = {}  # Track jobs per company for logging
+            
             for company, jobs in jobs_dict.items():
-                total_scraped += len(jobs)
+                count = len(jobs)
+                total_scraped += count
+                company_counts[company] = count
+                
                 for job in jobs:
                     link = job.get('link', '')
                     
@@ -220,13 +227,28 @@ class GoogleSheetsManager:
             # Log the run to 'Run Log' worksheet
             if hasattr(self, 'log_worksheet'):
                 status_msg = "Jobs Added" if new_rows else "No New Jobs"
+                
+                # Create breakdown string (e.g., "Elbit: 21, NVIDIA: 2")
+                # Sort by count descending for better readability
+                sorted_counts = sorted(company_counts.items(), key=lambda x: x[1], reverse=True)
+                breakdown = ", ".join([f"{k}: {v}" for k, v in sorted_counts if v > 0])
+                
+                # Check if header needs update (if only 4 columns exist)
+                try:
+                    headers = self.log_worksheet.row_values(1)
+                    if len(headers) < 5:
+                        self.log_worksheet.update_cell(1, 5, "Breakdown")
+                except:
+                    pass
+
                 self.log_worksheet.append_row([
                     current_date,
                     total_scraped,
                     len(new_rows),
-                    status_msg
+                    status_msg,
+                    breakdown  # New column with details!
                 ])
-                print(f"[OK] Logged run to 'Run Log' worksheet")
+                print(f"[OK] Logged run to 'Run Log' worksheet with breakdown")
             
             return len(new_rows)
             
