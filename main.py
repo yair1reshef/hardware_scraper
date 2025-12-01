@@ -170,6 +170,24 @@ def main():
         
     print()
     
+    # --- SolarEdge ---
+    print("Scraping SolarEdge...")
+    try:
+        from src.scrapers.solaredge_scraper import SolarEdgeScraper
+        solaredge_url = "https://corporate.solaredge.com/en/careers/open-positions"
+        scraper = SolarEdgeScraper(url=solaredge_url)
+        jobs = scraper.extract_jobs()
+        
+        # Apply filter
+        filtered_solaredge = job_filter.filter_jobs(jobs)
+        all_jobs['SolarEdge'] = filtered_solaredge
+        print(f"[OK] SolarEdge: Found {len(filtered_solaredge)} relevant jobs (filtered from {len(jobs)})")
+    except Exception as e:
+        print(f"[ERROR] SolarEdge: Error - {e}")
+        all_jobs['SolarEdge'] = []
+    
+    print()
+    
     # --- Elbit Systems ---
     print("Scraping Elbit Systems...")
     try:
@@ -184,8 +202,8 @@ def main():
         print(f"[OK] Elbit: Found {len(filtered_elbit)} relevant jobs (filtered from {len(jobs)})")
         scraper.close()
     except Exception as e:
-        print(f"[ERROR] SolarEdge: Error - {e}")
-        all_jobs['SolarEdge'] = []
+        print(f"[ERROR] Elbit: Error - {e}")
+        all_jobs['Elbit'] = []
     
     print()
     
