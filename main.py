@@ -91,6 +91,26 @@ def main():
         all_jobs['HP'] = []
     
     print()
+
+    # --- Applied Materials (Eightfold) ---
+    print("Scraping Applied Materials...")
+    try:
+        applied_url = "https://careers.appliedmaterials.com/careers?domain=appliedmaterials.com&triggerGoButton=false&start=0&pid=&sort_by=relevance&filter_employee_type=intern+%2F+student&filter_country=Israel"
+        scraper = EightfoldScraper(url=applied_url, headless=True)
+        scraper.connect()
+        scraper.navigate()
+        jobs = scraper.extract_jobs()
+        
+        # Apply filter
+        filtered_applied = job_filter.filter_jobs(jobs)
+        all_jobs['Applied Materials'] = filtered_applied
+        print(f"[OK] Applied Materials: Found {len(filtered_applied)} relevant jobs (filtered from {len(jobs)})")
+        scraper.close()
+    except Exception as e:
+        print(f"[ERROR] Applied Materials: Error - {e}")
+        all_jobs['Applied Materials'] = []
+    
+    print()
     
     # --- Qualcomm (Eightfold) ---
     print("Scraping Qualcomm...")
