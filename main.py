@@ -175,7 +175,8 @@ def main():
     print("Scraping Amazon...")
     try:
         from src.scrapers.amazon_scraper import AmazonScraper
-        amazon_url = "https://amazon.jobs/content/en/career-programs/university/internships-for-students?country%5B%5D=IL&region%5B%5D=TA"
+        # Use a broader search URL to catch all student positions
+        amazon_url = "https://www.amazon.jobs/en/search?base_query=Student&loc_query=Israel&country=IL"
         scraper = AmazonScraper(url=amazon_url, headless=True)
         jobs = scraper.extract_jobs()
         
